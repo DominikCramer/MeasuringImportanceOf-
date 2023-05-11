@@ -1,0 +1,40 @@
+
+model{
+
+## latent variable model
+
+  for (i in 1:N){
+    factorstar[i,1] ~ dnorm(0, 1)
+    Mu[i] <- 0
+    for (j in 1:J){
+      y[i,j] ~ dnorm(MuY[i,j], Inv_sig_e1[j])
+	  MuY[i,j] <- int1[j] + lambda1star[j] * factorstar[i,1]
+    }
+  }
+  
+## prior distribution for factor loadings
+## one of lambda_star has to be fixed 
+## factors are not allowed to be correlated
+
+  lambda1star[1] <- 1 ## make model identifiably
+  lambda1star[2] ~ dnorm(0, 1)
+  lambda1star[3] ~ dnorm(0, 1)
+  lambda1star[4] ~ dnorm(0, 1)
+
+
+## prior for error variances and intercepts
+  for (j in 1:J){
+    Inv_sig_e1[j] ~ dgamma(0.1,0.1) 
+    int1[j] ~ dnorm(0,0.001)
+  }
+   
+## transform the parameters
+## error variance (sigma), factor loadings (lambdas), factor scores (thetas)
+  for (j in 1:J){
+    Sig_e[j] <- 1/Inv_sig_e1[j]
+    lambda1[j] <- ifelse(lambda1star[1] < 0, -1, 1) * lambda1star[j]
+  }
+  for (i in 1:N){
+  	factor[i,1] <-ifelse(lambda1star[1] < 0, -1, 1) * factorstar[i,1]
+  }
+}
