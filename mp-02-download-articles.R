@@ -1,5 +1,5 @@
-### Measuring the Significance of Political Elites
-### Simon Munzert
+# Master Thesis Dominik Cramer
+
 
 # set working directory
 setwd("/Users/DominikCramer/Desktop/master-thesis/mtdc-mp-analysis/")

@@ -1,7 +1,5 @@
 # Master Thesis Dominik Cramer
 
-### Measuring the Importance of Political Elites
-### Simon Munzert
 
 # set working directory
 setwd("/Users/DominikCramer/Desktop/master-thesis/mtdc-mp-analysis/")
@@ -16,7 +14,7 @@ load("../mtdc-mp-analysis/fixed_edits_df.RData")
 load("../mtdc-mp-analysis/fixed_net_bytes_diff_df.RData")
 load("../mtdc-mp-analysis/fixed_views_df.RData")
 load("../mtdc-mp-analysis/size_df.RData")
-load("../mtdc-mp-analysis/pagerank_df.RData") # this should in the end by just one df with 160 columns
+load("../mtdc-mp-analysis/pagerank_df.RData")
 
 # create vector with months
 source_folder <- "../mtdc-mp-analysis/articles/"

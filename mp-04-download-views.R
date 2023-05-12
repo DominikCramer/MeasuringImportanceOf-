@@ -1,4 +1,6 @@
-# Measuring the Importance of German MPs - 02
+# Master Thesis Dominik Cramer
+## parts of this script were taken from Simon Munzert (2018): Measuring the Imortance of Political Elites
+
 
 # set working directory
 setwd("/Users/DominikCramer/Desktop/master-thesis/mtdc-mp-analysis")
@@ -59,11 +61,6 @@ basename(urls[flag])
 file.remove(paste0(destfolder, basename(urls[flag]), ".csv"))
 
 
-
-df <- read_csv("/Users/DominikCramer/Desktop/master-thesis/mtdc-mp-analysis/views/Knut_Abraham.csv", col_types = cols())
-df_wide <- df %>%
-  select(c(date, views, article)) %>%
-  pivot_wider(names_from = date, values_from = views)
 
 # --- importing the csv files, pivot_wider, create one dataframe ---
 files <- list.files(destfolder, full.names = TRUE, pattern = ".+csv$")

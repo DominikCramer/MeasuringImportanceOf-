@@ -1,8 +1,5 @@
 # Master Thesis Dominik Cramer
 
-### Measuring the Importance of Political Elites
-### Simon Munzert
-
 # set working directory
 setwd("/Users/DominikCramer/Desktop/master-thesis/mtdc-mp-analysis/")
 

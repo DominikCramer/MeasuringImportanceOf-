@@ -1,3 +1,6 @@
+## one-factor model
+## parts of this script taken from Simon Munzert (2018): Measuring the Imortance of Political Elites
+
 
 model{
 

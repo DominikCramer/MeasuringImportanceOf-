@@ -1,4 +1,5 @@
-# Measuring the Importance of German Political Elites - 01
+# Master Thesis Dominik Cramer
+
 
 library(rvest)
 library(dplyr)

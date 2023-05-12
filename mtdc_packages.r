@@ -1,4 +1,5 @@
 # Master Thesis Dominik Cramer
+## parts of this script were taken from Simon Munzert (2018): Measuring the Imortance of Political Elites
 
 
 #devtools::install_github("EllaKaye/BradleyTerryScalable")
