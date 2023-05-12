@@ -205,7 +205,7 @@ parameter_names <- c("deviance",
 
 # get order of variables right
 factor_mcmc_sum_df <- factor_mcmc_sum_df[parameter_names,]
-factor_mcmc_sims_df <- factor_mcmc_sims_df[parameter_names,] # lambda1[5] and lambda2[1] column appear to only contain zeros
+factor_mcmc_sims_df <- factor_mcmc_sims_df[parameter_names,]
 
 
 # export data
