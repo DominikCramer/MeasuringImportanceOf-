@@ -1,3 +1,4 @@
+## this script is still pretty messy
 
 library(tidyr)
 library(dplyr)
@@ -152,7 +153,7 @@ plot <- ggplot(parliaments_03_23, aes(x = reorder(name, -value))) +
   geom_bar(aes(y = value), stat = "identity", fill = hertie) +
   geom_line(aes(y = people/100, group =1), color = "black") +
   scale_y_continuous(
-    name = "Mean Impotance Score of MPs",
+    name = "Mean Score of MPs",
     sec.axis = sec_axis(~.*100, name = "Constituents (millions)")) +
   labs(x = "", y = "Mean Score of Members") +
   theme_bw() +
