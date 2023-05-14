@@ -1,15 +1,18 @@
 
 library(tidyr)
 library(dplyr)
+library(readr)
+library(stringr)
+library(ggplot2)
 
 setwd("/Users/DominikCramer/Desktop/master-thesis/mtdc-mp-analysis/")
 
 #import results dataframes
-fa_importance_df <- read_csv2("../mtdc-mp-analysis/results-dfs/full_fa_importance_df.csv", col_types = cols())
-fa_importance_rank_df <- read_csv2("../mtdc-mp-analysis/results-dfs/full_fa_importance_rank_df.csv", col_types = cols())
-bfa_importance_df <- read_csv2("../mtdc-mp-analysis/results-dfs/full_bfa_importance_df.csv", col_types = cols())
-bfa_importance_rank_df <- read_csv2("../mtdc-mp-analysis/results-dfs/full_bfa_importance_rank_df.csv", col_types = cols())
-
+# fa_importance_df <- read_csv2("../mtdc-mp-analysis/results-dfs/full_fa_importance_df.csv", col_types = cols())
+# fa_importance_rank_df <- read_csv2("../mtdc-mp-analysis/results-dfs/full_fa_importance_rank_df.csv", col_types = cols())
+ bfa_importance_df <- read_csv2("/Users/DominikCramer/Desktop/master-thesis/MeasuringImportanceOfGermanPoliticalElites/data/full_bfa_importance_df.csv", col_types = cols())
+# bfa_importance_rank_df <- read_csv2("../mtdc-mp-analysis/results-dfs/full_bfa_importance_rank_df.csv", col_types = cols())
+load("/Users/DominikCramer/Desktop/master-thesis/MeasuringImportanceOfGermanPoliticalElites/data/fixed_mp_all_df.RData")
 
 # define colours
 hertie <- "#952220"
@@ -32,19 +35,144 @@ df_monthly <- df_long %>%
   select(-month) %>%
   pivot_wider(names_from = article, values_from = value)
 
+# calculate monthly mean
+row_means <- rowMeans(select(df_monthly, -date), na.rm = TRUE)
+df_monthly_mean <- cbind(df_monthly, row_means)
+# plot mean over time
+ggplot(df_monthly_mean, aes(date)) +
+  geom_point(aes(y = row_means))
 
 
-# plot for the rank of a single politician
-ggplot(df_monthly, aes(date, Armin_Laschet)) +
-  geom_line(color = hertie, size = 1) + geom_point(shape = 21, fill = "white", size = 1.5) +
-  geom_smooth(color = "black") +
-  scale_x_date(limits = as.Date(c("2010-01-01", "2023-03-31")), 
-               date_breaks = "1 year", 
+parliament_df <- select(fixed_mp_all_df, parliament, article)
+bfa_parliament_df <- left_join(bfa_importance_df, parliament_df, by = "article")
+# convert bfa_importance_rank_df to long format
+df_long_p <- bfa_parliament_df %>%
+  gather(month, value, -article, -parliament)
+# create a new column with the year and month as a date object
+df_long_p$date <- as.Date(paste0(df_long_p$month, "-01"))
+# select and group by month and article, summarizing the values
+df_monthly_p <- df_long_p %>%
+  select(-month) %>%
+  pivot_wider(names_from = parliament, values_from = value)
+# remove article column
+df_monthly_p <- select(df_monthly_p, -article)
+# proof of principle with example berlin
+be_df <- select(df_monthly_p, date, `Abgeordnetenhaus von Berlin`)
+be_summary <- be_df %>%
+  group_by(date) %>%
+  summarize(mean_value = mean(`Abgeordnetenhaus von Berlin`, na.rm = TRUE))
+
+df_summary <- df_monthly_p %>%
+  group_by(date) %>%
+  summarize_at(vars(`Abgeordnetenhaus von Berlin`, `Bayerischer Landtag`, `Bremische Bürgerschaft`, `Bürgerschaft der Freien und Hansestadt Hamburg`, `Deutscher Bundestag`, `Hessischer Landtag`, `Landtag Brandenburg`, `Landtag des Saarlandes`, `Landtag Mecklenburg-Vorpommern`, `Landtag Niedersachsen`, `Landtag Nordrhein-Westphalen`, `Landtag Rheinland-Pfalz`, `Landtag von Baden-Württemberg`, `Landtag von Sachsen-Anhalt`, `Sächsischer Landtag`, `Schleswig-Holsteinischer Landtag`, `Thüringer Landtag`), mean, na.rm = TRUE)
+
+ggplot(df_summary, aes(date)) +
+  geom_point(aes(y = `Deutscher Bundestag`))
+
+df_longest <- df_summary %>%
+  pivot_longer(cols = -date, names_to = "parliament", values_to = "mean")
+
+# plot small multiples of 
+plot <- ggplot(df_longest, aes(x = date, y = mean)) +
+  geom_point(shape = 16, fill = "white", size = 0.3) +
+  geom_smooth(color = hertie, size = 0.5, se = FALSE, span = 0.25) +
+  facet_wrap(~parliament, scales = "free_y") +
+  scale_x_date(limits = as.Date(c("2010-01-01", "2023-03-31")),
+               date_breaks = "1 year",
+               date_labels = "%Y") +
+  ylim(-0.8, 1.1) + # for bfa
+  #  scale_y_reverse(limits = c(100, 1)) + # for bfa_rank & fa_rank - reverse y scale so that most important people are on top
+  labs(x = "Date", y = "Mean Score", title = "Mean Bayesian Factor Scores of Politicians over Time") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 5.5),
+        axis.text.y = element_text(size = 5.5),
+        strip.text = element_text(size = 6))
+
+ggsave("../mtdc-mp-analysis/figures/mean-parliaments-bfa.jpg", plot, width = 7, height = 5, dpi = 300)
+
+
+# plot for the mean score of members of the bundestag
+plot <- ggplot(df_summary, aes(date, `Deutscher Bundestag`)) +
+  # geom_line(color = hertie, size = 1) + 
+  geom_point(shape = 21, fill = "white", size = 1.5) +
+  geom_smooth(color = hertie, span = 0.25) +
+  scale_x_date(limits = as.Date(c("2010-01-01", "2023-03-31")),
+               date_breaks = "1 year",
                date_labels = "%b %Y") +
-  scale_y_reverse() + # reverse y scale for rankings so that most important people are on top
-  labs(x = "Date", y = "Rank", title = "Markus Söder") +
+#  scale_y_reverse() + # reverse y scale for rankings so that most important people are on top
+  labs(x = "Date", y = "Mean Score", title = "Mean Bayesian Factor Scores of Members of the Bundestag over Time") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggsave("../mtdc-mp-analysis/figures/mean-bundestag-bfa.jpg", plot, width = 7, height = 5, dpi = 300)
+
+# comparing parliaments as of march 2023
+parliaments_03_23 <- filter(df_summary, date == "2023-03-01") %>% pivot_longer(cols = -date) %>% select(-date)
+#add column with inhabitants
+parliaments_03_23$people <- as.numeric(c("3.7", "13.2", "0.7", "1.9", "83.2", "6.3", "2.5", "1.0", "1.6", "8.0", "17.9", "4.1", "11.1", "2.2", "4.0", "2.9", "2.1"))
+# define factor level to have the chart sorted by value
+parliaments_03_23$name <- factor(parliaments_03_23$name, levels = c("Deutscher Bundestag",
+                                                                    "Abgeordnetenhaus von Berlin",
+                                                                    "Bayerischer Landtag",
+                                                                    "Landtag von Baden-Württemberg",
+                                                                    "Thüringer Landtag",
+                                                                    "Landtag Nordrhein-Westphalen",
+                                                                    "Sächsischer Landtag",
+                                                                    "Schleswig-Holsteinischer Landtag",
+                                                                    "Landtag Niedersachsen",
+                                                                    "Landtag Rheinland-Pfalz",
+                                                                    "Hessischer Landtag",
+                                                                    "Landtag Brandenburg",
+                                                                    "Landtag Mecklenburg-Vorpommern",
+                                                                    "Bremische Bürgerschaft",
+                                                                    "Landtag von Sachsen-Anhalt",
+                                                                    "Bürgerschaft der Freien und Hansestadt Hamburg",
+                                                                    "Landtag des Saarlandes"
+                                                                    ))
+# only scores
+ggplot(sorted_parliaments_03_23, aes(x = name, y = value)) +
+  geom_bar(stat = "identity", fill = hertie, aes(x = reorder(name, -value))) +
+  labs(x = "Parliament", y = "Mean Score of Members", title = "03 2023") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 60, hjust = 1))
+
+#scores vs number of inhabitants
+ggplot(parliaments_03_23, aes(x = reorder(name, -value))) +
+  geom_bar(aes(y = people), stat = "identity", fill = "grey") +
+  geom_bar(aes(y = value), stat = "identity", fill = hertie) +
+  scale_y_continuous(name = "Value", sec.axis = sec_axis(~ ., name = "People"))
+
+ggplot(parliaments_03_23, aes(x = name, y = value)) + 
+  geom_bar(stat = "identity")
+
+# the following works!
+plot <- ggplot(parliaments_03_23, aes(x = reorder(name, -value))) +
+  geom_bar(aes(y = value), stat = "identity", fill = hertie) +
+  geom_line(aes(y = people/100, group =1), color = "black") +
+  scale_y_continuous(
+    name = "Mean Impotance Score of MPs",
+    sec.axis = sec_axis(~.*100, name = "Constituents (millions)")) +
+  labs(x = "", y = "Mean Score of Members") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 60, hjust = 1))
+
+ggsave("../mtdc-mp-analysis/figures/score-v-people-bfa.jpg", plot, width = 7, height = 5, dpi = 300)
+
+
+# # plot for the rank of a single politician
+# ggplot(df_monthly, aes(date, Armin_Laschet)) +
+#   geom_line(color = hertie, size = 1) + geom_point(shape = 21, fill = "white", size = 1.5) +
+#   geom_smooth(color = "black") +
+#   scale_x_date(limits = as.Date(c("2010-01-01", "2023-03-31")), 
+#                date_breaks = "1 year", 
+#                date_labels = "%b %Y") +
+#   scale_y_reverse() + # reverse y scale for rankings so that most important people are on top
+#   labs(x = "Date", y = "Rank", title = "Markus Söder") +
+#   theme_bw() +
+#   theme(panel.grid.minor = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
 
 # plot for the scores of two politicians
 plot <- ggplot(df_monthly, aes(date)) +
@@ -84,8 +212,15 @@ ggsave("../mtdc-mp-analysis/figures/laschet-merz-bfa.jpg", plot, width = 9.4, he
 df_m <- df_monthly %>% select(date,
                               # Olaf_Scholz,
                               # Gregor_Gysi,
-                              Armin_Laschet,
-                              Friedrich_Merz,
+                              # Armin_Laschet,
+                              # Friedrich_Merz,
+                              Karl_Lauterbach,
+                              # Ilse_Aigner,
+                              # Serpil_Midyatli,
+                              # `Thomas_Losse-M%C3%BCller`,
+                              # Karin_Prien,
+                              # `Serap_G%C3%BCler`,
+                              Mona_Neubaur,
                               # Thomas_Kemmerich,
                               Sahra_Wagenknecht,
                               Alexander_Gauland,
@@ -113,8 +248,15 @@ df_m <- df_monthly %>% select(date,
 names(df_m) <- c("date",
                # "Olaf Scholz (SPD)",
                # "Gregor Gysi",
-               "Armin Laschet (CDU)",
-               "Friedrich Merz (CDU)",
+               # "Armin Laschet (CDU)",
+               # "Friedrich Merz (CDU)",
+               "Karl Lauterbach (SPD)",
+               # "Ilse Aigner (CSU)",
+               # "Serpil Midyatli (SPD)",
+               # "Thomas Losse-Müller (SPD)",
+               # "Karin Prien (CDU)",
+               # "Serap Güler (CDU)",
+               "Mona Neubaur (Grüne)",
                # "Thomas Kemmerich",
                "Sahra Wagenknecht (Linke)",
                "Alexander Gauland (AfD)",
@@ -142,7 +284,8 @@ names(df_m) <- c("date",
 df_longer <- df_m %>%
   pivot_longer(cols = -date, names_to = "politician", values_to = "ranking")
 
-plot <- ggplot(df_longer, aes(x = date, y = ranking)) +
+ plot <- 
+  ggplot(df_longer, aes(x = date, y = ranking)) +
   geom_point(shape = 16, fill = "white", size = 0.3) +
   geom_smooth(color = hertie, size = 0.5, se = FALSE, span = 0.25) +
   facet_wrap(~politician, scales = "free_y") +
@@ -158,7 +301,7 @@ plot <- ggplot(df_longer, aes(x = date, y = ranking)) +
         axis.text.y = element_text(size = 5.5),
         strip.text = element_text(size = 6))
 
-ggsave("../mtdc-mp-analysis/figures/notables-bfa.jpg", plot, width = 7, height = 5, dpi = 300)
+ggsave("../mtdc-mp-analysis/figures/notables2-bfa.jpg", plot, width = 7, height = 5, dpi = 300)
 
 
 
