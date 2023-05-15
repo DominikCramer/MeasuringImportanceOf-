@@ -73,7 +73,7 @@ ggplot(df_summary, aes(date)) +
 df_longest <- df_summary %>%
   pivot_longer(cols = -date, names_to = "parliament", values_to = "mean")
 
-# plot small multiples of 
+# plot small multiples of mean in all 17 parliaments over time
 plot <- ggplot(df_longest, aes(x = date, y = mean)) +
   geom_point(shape = 16, fill = "white", size = 0.3) +
   geom_smooth(color = hertie, size = 0.5, se = FALSE, span = 0.25) +
@@ -148,20 +148,20 @@ ggplot(parliaments_03_23, aes(x = reorder(name, -value))) +
 ggplot(parliaments_03_23, aes(x = name, y = value)) + 
   geom_bar(stat = "identity")
 
-# the following works!
-plot <- ggplot(parliaments_03_23, aes(x = reorder(name, -value))) +
-  geom_bar(aes(y = value), stat = "identity", fill = hertie) +
-  geom_line(aes(y = people/100, group =1), color = "black") +
-  scale_y_continuous(
-    name = "Mean Score of MPs",
-    sec.axis = sec_axis(~.*100, name = "Constituents (millions)")) +
-  labs(x = "", y = "Mean Score of Members") +
-  theme_bw() +
-  theme(panel.grid.minor = element_blank(),
-        axis.text.x = element_text(angle = 60, hjust = 1))
-
-ggsave("../mtdc-mp-analysis/figures/score-v-people-bfa.jpg", plot, width = 7, height = 5, dpi = 300)
-
+# # the following works!
+# plot <- ggplot(parliaments_03_23, aes(x = reorder(name, -value))) +
+#   geom_bar(aes(y = value), stat = "identity", fill = hertie) +
+#   geom_line(aes(y = people/100, group =1), color = "black") +
+#   scale_y_continuous(
+#     name = "Mean Score of MPs",
+#     sec.axis = sec_axis(~.*100, name = "Constituents (millions)")) +
+#   labs(x = "", y = "Mean Score of Members") +
+#   theme_bw() +
+#   theme(panel.grid.minor = element_blank(),
+#         axis.text.x = element_text(angle = 60, hjust = 1))
+# 
+# ggsave("../mtdc-mp-analysis/figures/score-v-people-bfa.jpg", plot, width = 7, height = 5, dpi = 300)
+# 
 
 # # plot for the rank of a single politician
 # ggplot(df_monthly, aes(date, Armin_Laschet)) +
@@ -178,34 +178,36 @@ ggsave("../mtdc-mp-analysis/figures/score-v-people-bfa.jpg", plot, width = 7, he
 # plot for the scores of two politicians
 plot <- ggplot(df_monthly, aes(date)) +
 #  geom_line(aes(y = Armin_Laschet), color = gruene, size = 0.3) +
-  geom_smooth(aes(y = Armin_Laschet), color = gruene, size = 1, span = 0.25) +
-  geom_text(aes(x = as.Date("2014-06-01"), y = 1.1, label = "Armin Laschet"), size = 5, color = gruene) +
-  geom_point(aes(y = Armin_Laschet), shape = 21, fill = gruene, size = 1.5) +
+  geom_smooth(aes(y = Armin_Laschet), color = "#CA908F", size = 1, span = 0.25, se = FALSE) +
+  geom_text(aes(x = as.Date("2014-06-01"), y = 1.1, label = "Armin Laschet"), size = 4, color = "#CA908F") +
+  geom_point(aes(y = Armin_Laschet), shape = 21, fill = "#CA908F", size = 1.5) +
 #  geom_line(aes(y = Friedrich_Merz), color = cdu, size = 0.3) +
-  geom_smooth(aes(y = Friedrich_Merz), color = cdu, size = 1, span = 0.25) +
-  geom_text(aes(x = as.Date("2014-06-01"), y = 3.25, label = "Friedrich Merz"), size = 5, color = cdu) +
+  geom_smooth(aes(y = Friedrich_Merz), color = hertie, size = 1, span = 0.25, se = FALSE) +
+  geom_text(aes(x = as.Date("2014-06-01"), y = 3.15, label = "Friedrich Merz"), size = 4, color = hertie) +
+  geom_point(aes(y = Friedrich_Merz), shape = 24, fill = hertie, size = 1.5) +
   # important events
-  geom_point(aes(y = Friedrich_Merz), shape = 24, fill = cdu, size = 1.5) +
   geom_vline(aes(xintercept = as.Date("2012-06-30")), linetype = "dashed") +
-  geom_text(aes(x = as.Date("2012-09-10"), y = 0.8, label = "(1)"), size = 5) + # Laschet wird CDU Landeschef
+  geom_text(aes(x = as.Date("2012-10-10"), y = 0.8, label = "(1)"), size = 4) + # Laschet wird CDU Landeschef
   geom_vline(aes(xintercept = as.Date("2017-06-27")), linetype = "dashed") +
-  geom_text(aes(x = as.Date("2017-09-07"), y = 0.8, label = "(2)"), size = 5) + # Laschet wird NW Ministerpräsident
+  geom_text(aes(x = as.Date("2017-10-07"), y = 0.8, label = "(2)"), size = 4) + # Laschet wird NW Ministerpräsident
   geom_vline(aes(xintercept = as.Date("2018-10-30")), linetype = "dashed") +
-  geom_text(aes(x = as.Date("2019-01-10"), y = 0.8, label = "(3)"), size = 5) + # Merz kündigt Kandidatur für CDU Vorsitz an
+  geom_text(aes(x = as.Date("2019-02-10"), y = 0.8, label = "(3)"), size = 4) + # Merz kündigt Kandidatur für CDU Vorsitz an
   geom_vline(aes(xintercept = as.Date("2021-01-22")), linetype = "dashed") +
-  geom_text(aes(x = as.Date("2021-04-02"), y = 0.8, label = "(4)"), size = 5) + # Laschet wird gewinnt gegen merz, wird CDU chef
-  geom_vline(aes(xintercept = as.Date("2022-01-31")), linetype = "dashed") +
-  geom_text(aes(x = as.Date("2022-04-11"), y = 0.8, label = "(5)"), size = 5) + # Merz wird CDU Chef
+  geom_text(aes(x = as.Date("2021-05-02"), y = 0.8, label = "(4)"), size = 4) + # Laschet wird gewinnt gegen merz, wird CDU chef
+  geom_vline(aes(xintercept = as.Date("2021-09-26")), linetype = "dashed") +
+  geom_text(aes(x = as.Date("2022-01-05"), y = 0.8, label = "(5)"), size = 4) + # Buntestagswahl 2021
+  # geom_vline(aes(xintercept = as.Date("2022-01-31")), linetype = "dashed") +
+  # geom_text(aes(x = as.Date("2022-06-11"), y = 0.8, label = "(6)"), size = 4) + # Merz wird CDU Chef
   scale_x_date(limits = as.Date(c("2010-01-01", "2023-03-31")),
                date_breaks = "1 year",
                date_labels = "%b %Y") +
 #  scale_y_reverse() + # reverse y scale for rankings so that most important people are on top
-  labs(x = "Date", y = "Score", title = "Bayesian Factor Scores of Armin Laschet and Friedrich Merz over Time") +
+  labs(x = "Date", y = "Score") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggsave("../mtdc-mp-analysis/figures/laschet-merz-bfa.jpg", plot, width = 9.4, height = 6.7, dpi = 300)
+ggsave("../mtdc-mp-analysis/figures/laschet-merz3-bfa.jpg", plot, width = 7, height = 5, dpi = 300)
 
 
 
