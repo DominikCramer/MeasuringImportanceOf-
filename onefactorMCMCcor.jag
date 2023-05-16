@@ -1,5 +1,5 @@
 ## one-factor model
-## parts of this script taken from Simon Munzert (2018): Measuring the Imortance of Political Elites
+## taken and adapted from Simon Munzert (2018): Measuring the Imortance of Political Elites
 
 
 model{
@@ -19,7 +19,7 @@ model{
 ## one of lambda_star has to be fixed 
 ## factors are not allowed to be correlated
 
-  lambda1star[1] <- 1 ## make model identifiably
+  lambda1star[1] <- 1 ## make model identifiable
   lambda1star[2] ~ dnorm(0, 1)
   lambda1star[3] ~ dnorm(0, 1)
   lambda1star[4] ~ dnorm(0, 1)
