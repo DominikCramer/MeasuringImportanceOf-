@@ -238,7 +238,7 @@ df_m <- df_monthly %>% select(date,
                               # Tino_Chrupalla,
                               Alice_Weidel,
                               Saskia_Esken,
-                              Lars_Klingbeil,
+                              # Lars_Klingbeil,
                               Omid_Nouripour,
                               Ricarda_Lang,
                               Christian_Lindner,
@@ -274,7 +274,7 @@ names(df_m) <- c("date",
                # "Tino Chrupalla (AfD)",
                "Alice Weidel (AfD)",
                "Saskia Esken (SPD)",
-               "Lars Klingbeil (SPD)",
+               # "Lars Klingbeil (SPD)",
                "Omid Nouripour (Grüne)",
                "Ricarda Lang (Grüne)",
                "Christian Lindner (FDP)",
@@ -287,24 +287,24 @@ names(df_m) <- c("date",
 df_longer <- df_m %>%
   pivot_longer(cols = -date, names_to = "politician", values_to = "ranking")
 
- plot <- 
+ plot <-
   ggplot(df_longer, aes(x = date, y = ranking)) +
   geom_point(shape = 16, fill = "white", size = 0.3) +
   geom_smooth(color = hertie, size = 0.5, se = FALSE, span = 0.25) +
-  facet_wrap(~politician, scales = "free_y") +
+  facet_wrap(~politician, scales = "free_y", ncol = 3) +
   scale_x_date(limits = as.Date(c("2010-01-01", "2023-03-31")),
                date_breaks = "1 year",
                date_labels = "%Y") +
   ylim(-2, 6) + # for bfa
 #  scale_y_reverse(limits = c(100, 1)) + # for bfa_rank & fa_rank - reverse y scale so that most important people are on top
-  labs(x = "Date", y = "Score", title = "Bayesian Factor Scores of Politicians over Time") +
+  labs(x = "", y = "Score") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1, size = 5.5),
         axis.text.y = element_text(size = 5.5),
         strip.text = element_text(size = 6))
 
-ggsave("../mtdc-mp-analysis/figures/notables2-bfa.jpg", plot, width = 7, height = 5, dpi = 300)
+ggsave("../mtdc-mp-analysis/figures/notables90-bfa.jpg", plot, width = 5, height = 7, dpi = 300)
 
 
 
@@ -347,20 +347,21 @@ names(df_m) <- c("date",
 df_longer <- df_m %>%
   pivot_longer(cols = -date, names_to = "politician", values_to = "ranking")
 
-plot <- ggplot(df_longer, aes(x = date, y = ranking)) +
+plot <-
+  ggplot(df_longer, aes(x = date, y = ranking)) +
   geom_point(shape = 16, fill = "white", size = 0.3) +
   geom_smooth(color = hertie, size = 0.5, se = FALSE, span = 0.25) +
-  facet_wrap(~politician, scales = "free_y") +
+  facet_wrap(~politician, scales = "free_y", ncol = 3) +
   scale_x_date(limits = as.Date(c("2010-01-01", "2023-03-31")),
                date_breaks = "1 year",
                date_labels = "%Y") +
   ylim(-0.75, 5.75) + # for bfa
   #  scale_y_reverse(limits = c(100, 1)) + # for bfa_rank & fa_rank - reverse y scale so that most important people are on top
-  labs(x = "Date", y = "Score", title = "Bayesian Factor Scores of Heads of Government over Time") +
+  labs(x = "", y = "Score") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1, size = 5.5),
         axis.text.y = element_text(size = 5.5),
         strip.text = element_text(size = 6))
 
-ggsave("../mtdc-mp-analysis/figures/regierungschefs-bfa.jpg", plot, width = 7, height = 5, dpi = 300)
+ggsave("../mtdc-mp-analysis/figures/regierungschefs90-bfa.jpg", plot, width = 5, height = 7, dpi = 300)
